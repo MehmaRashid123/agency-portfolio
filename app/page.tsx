@@ -6,7 +6,7 @@ import StatsSection from "@/components/StatsSection";
 import AboutTeaser from "@/components/AboutTeaser";
 import Testimonials from "@/components/Testimonials";
 import CTABanner from "@/components/CTABanner";
-import { getFeaturedProjects, getSettings, getTestimonials } from "@/lib/api";
+import { getFeaturedProjects, getSettings, getTestimonials, type Project, type Settings, type Testimonial } from "@/lib/api";
 
 export async function generateMetadata() {
   try {
@@ -22,7 +22,9 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  let projects = [], settings = undefined, testimonials = [];
+  let projects: Project[] = [];
+  let settings: Settings | undefined = undefined;
+  let testimonials: Testimonial[] = [];
   try {
     [projects, settings, testimonials] = await Promise.all([
       getFeaturedProjects().catch(() => []),

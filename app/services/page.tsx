@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { getServices, getSettings } from "@/lib/api";
+import { getServices, getSettings, type Service, type Settings } from "@/lib/api";
 import FAQAccordion from "@/components/FAQAccordion";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,12 +17,13 @@ const SERVICE_ICONS: Record<string, React.ReactNode> = {
 };
 
 export default async function ServicesPage() {
-  let services = [], settings = undefined;
+  let services: Service[] = [];
+  let settings: Settings | undefined = undefined;
   try {
     [services, settings] = await Promise.all([getServices().catch(() => []), getSettings().catch(() => undefined)]);
   } catch {}
 
-  const pageHeading = (settings as any)?.servicesPage?.heading || "Services & Pricing";
+  const pageHeading = settings?.servicesPage?.heading || "Services & Pricing";
   const faqHeading = (settings as any)?.servicesPage?.faqHeading || "FAQ";
   const faqs = (settings as any)?.servicesPage?.faqs || [];
 
@@ -36,7 +37,7 @@ export default async function ServicesPage() {
       </section>
 
       <section aria-label="Service details">
-        {services.map((s: any, i: number) => (
+        {services.map((s, i) => (
           <div key={s._id} id={s.slug} className={`border-b border-[var(--border)] ${i % 2 === 1 ? "bg-[var(--bg-2)]" : ""}`}>
             <div className="container py-16 md:py-24">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16">
