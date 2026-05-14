@@ -1,4 +1,4 @@
-﻿const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+﻿const BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003').replace(/\/$/, '');
 
 export interface Project {
   _id: string; title: string; slug: string;
@@ -50,8 +50,12 @@ export interface Settings {
 }
 
 async function apiFetch<T>(path: string, revalidate: number): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { next: { revalidate } });
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
+  const url = `${BASE}${path}`;
+  const res = await fetch(url, { next: { revalidate } });
+  if (!res.ok) {
+    console.error(`[apiFetch] ${res.status} ${res.statusText} — ${url}`);
+    throw new Error(`API error ${res.status}: ${path}`);
+  }
   const json = await res.json();
   if (!json.success) throw new Error(json.error || `Failed to fetch ${path}`);
   return json.data as T;
