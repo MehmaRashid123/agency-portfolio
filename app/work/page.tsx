@@ -5,79 +5,205 @@ import Link from "next/link";
 import Image from "next/image";
 import { gsap } from "gsap";
 import type { Project, Settings } from "@/lib/api";
-import { getProjects, getSettings } from "@/lib/api";
+import { getProjects, getSettings, getCategories } from "@/lib/api";
 
 export default function WorkPage() {
   const [active, setActive] = useState("all");
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [settings, setSettings] = useState<Settings | undefined>();
+  const [filters, setFilters] = useState<{ value: string; label: string }[]>([
+    { value: "all", label: "All" },
+  ]);
   const [loading, setLoading] = useState(true);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    Promise.all([getProjects().catch(() => []), getSettings().catch(() => undefined)])
-      .then(([p, s]) => { setAllProjects(p); setSettings(s); })
-      .finally(() => setLoading(false));
+    Promise.all([
+      getProjects().catch(() => []),
+      getSettings().catch(() => undefined),
+      getCategories().catch(() => []),
+    ]).then(([p, s, cats]) => {
+      setAllProjects(p);
+      setSettings(s);
+      const fl = s?.workPage?.filterLabels;
+      setFilters([
+        { value: "all", label: fl?.all || "All" },
+        ...cats.map((c) => ({ value: c.slug, label: c.label })),
+      ]);
+    }).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    gsap.fromTo(headingRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
+    if (!headingRef.current) return;
+    gsap.fromTo(headingRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }
+    );
   }, []);
 
-  const fl = settings?.workPage?.filterLabels;
-  const filters = [
-    { value: "all", label: fl?.all || "All" },
-    { value: "graphic", label: fl?.graphic || "Graphic Design" },
-    { value: "web", label: fl?.web || "Web Development" },
-    { value: "3d", label: fl?.threeD || "3D Art" },
-  ];
+  useEffect(() => {
+    if (!gridRef.current || loading) return;
+    const cards = gridRef.current.querySelectorAll(".work-card");
+    gsap.fromTo(cards,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }
+    );
+  }, [active, loading]);
 
   const heading = settings?.workPage?.heading || "Our Work";
-  const filtered = active === "all" ? allProjects : allProjects.filter(p => p.category === active);
+  const subheading = settings?.workPage?.subheading;
+  const filtered = active === "all"
+    ? allProjects
+    : allProjects.filter(p => p.category === active);
 
   return (
     <div style={{ paddingTop: "var(--nav-h)" }}>
-      <section className="section-pad pb-0" aria-label="Work page header">
-        <div className="container">
-          <h1 ref={headingRef} className="heading-xl mb-10" style={{ opacity: 0 }}>{heading}</h1>
-          <div className="flex flex-wrap gap-3 mb-12" role="group" aria-label="Filter projects by category">
-            {filters.map(f => (
-              <button key={f.value} onClick={() => setActive(f.value)}
-                className={`btn text-xs py-2.5 px-5 transition-all duration-300 ${active === f.value ? "btn-primary" : "btn-outline"}`}
-                aria-pressed={active === f.value}>{f.label}</button>
+
+      {/* ── Header — tight, no excess padding ── */}
+      <div className="container" style={{ paddingTop: "3rem", paddingBottom: "2rem" }}>
+
+        {/* Title row */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "1.5rem", flexWrap: "wrap", marginBottom: "1.75rem" }}>
+          <div>
+            <h1 ref={headingRef} className="heading-xl" style={{ opacity: 0, lineHeight: 0.92 }}>
+              {heading}
+            </h1>
+            {subheading && (
+              <p style={{ color: "rgba(255,255,255,0.4)", marginTop: "0.75rem", fontSize: "0.95rem", lineHeight: 1.6 }}>
+                {subheading}
+              </p>
+            )}
+          </div>
+          {!loading && (
+            <span className="label" style={{ color: "rgba(255,255,255,0.3)", whiteSpace: "nowrap" }}>
+              {filtered.length} project{filtered.length !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {/* Filter buttons */}
+        <div
+          style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", paddingBottom: "2rem", borderBottom: "1px solid var(--border)" }}
+          role="group"
+          aria-label="Filter by category"
+        >
+          {filters.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setActive(f.value)}
+              aria-pressed={active === f.value}
+              className={`btn text-xs py-2.5 px-5 transition-all duration-200 ${
+                active === f.value ? "btn-primary" : "btn-outline"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Grid ── */}
+      <div className="container" style={{ paddingBottom: "6rem" }}>
+        {loading ? (
+          // Skeleton — uniform 3-col
+          <div className="work-grid">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="work-skeleton"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              />
             ))}
           </div>
-        </div>
-      </section>
-      <section className="section-pad pt-0" aria-label="Project grid">
-        <div className="container">
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-[4/3] bg-[#1a1a1a] rounded" style={{ animation: "pulse 1.5s ease-in-out infinite" }} />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map(project => (
-                <Link key={project.slug} href={`/work/${project.slug}`} className="project-card block aspect-[4/3]" aria-label={`View project: ${project.title}`} style={{ animation: "fadeUp 0.6s var(--ease-out-expo) both" }}>
-                  <div className="relative w-full h-full overflow-hidden bg-[var(--bg-2)]">
-                    {project.thumbnail?.url && <Image src={project.thumbnail.url} alt={project.title} fill className="card-img object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />}
-                    <div className="card-overlay">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {project.tags.slice(0, 2).map(tag => <span key={tag} className="label text-[10px] px-2 py-1 border border-[var(--border)]">{tag}</span>)}
-                      </div>
-                      <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-heading)" }}>{project.title}</h2>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "5rem 0" }}>
+            <p className="label" style={{ color: "rgba(255,255,255,0.2)", marginBottom: "1.25rem" }}>
+              No projects in this category
+            </p>
+            <button onClick={() => setActive("all")} className="btn btn-outline text-xs py-2 px-5">
+              Show all
+            </button>
+          </div>
+        ) : (
+          <div ref={gridRef} className="work-grid">
+            {filtered.map((project) => (
+              <Link
+                key={project.slug}
+                href={`/work/${project.slug}`}
+                className="project-card work-card block"
+                aria-label={`View project: ${project.title}`}
+                style={{ opacity: 0 }}
+              >
+                <div className="relative w-full h-full overflow-hidden bg-[var(--bg-2)]">
+                  {project.thumbnail?.url && (
+                    project.thumbnail.url.toLowerCase().includes(".gif") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={project.thumbnail.url}
+                        alt={project.title}
+                        className="card-img"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
+                    ) : (
+                      <Image
+                        src={project.thumbnail.url}
+                        alt={project.title}
+                        fill
+                        className="card-img object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    )
+                  )}
+                  <div className="card-overlay">
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.6rem" }}>
+                      <span className="label" style={{ color: "var(--accent)", fontSize: "0.65rem" }}>
+                        {project.category}
+                      </span>
+                      {project.tags?.slice(0, 1).map(tag => (
+                        <span key={tag} className="label" style={{ fontSize: "0.65rem", padding: "0.15rem 0.5rem", border: "1px solid rgba(255,255,255,0.15)" }}>
+                          {tag}
+                        </span>
+                      ))}
                     </div>
+                    <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "clamp(1rem, 2vw, 1.4rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.1, color: "#fff" }}>
+                      {project.title}
+                    </h2>
+                    <p style={{ marginTop: "0.4rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                      View →
+                    </p>
                   </div>
-                </Link>
-              ))}
-            </div>
-          )}
-          {!loading && filtered.length === 0 && <p className="opacity-40 text-center py-20">No projects in this category yet.</p>}
-        </div>
-      </section>
-      <style jsx global>{`
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        .work-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.25rem;
+        }
+        .work-grid .project-card,
+        .work-skeleton {
+          aspect-ratio: 4 / 3;
+        }
+        .work-skeleton {
+          background: var(--bg-2);
+          animation: skPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes skPulse {
+          0%, 100% { opacity: 0.35; }
+          50%       { opacity: 0.6;  }
+        }
+        @media (max-width: 1024px) {
+          .work-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+          .work-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+        }
       `}</style>
     </div>
   );

@@ -2,7 +2,7 @@
 
 export interface Project {
   _id: string; title: string; slug: string;
-  category: 'graphic' | 'web' | '3d'; status: 'draft' | 'published';
+  category: string; status: 'draft' | 'published';
   shortDescription: string; fullDescription: string; tags: string[];
   client: string; year: string; tools: string[];
   thumbnail: { url: string; publicId: string };
@@ -10,7 +10,7 @@ export interface Project {
   videoUrl?: string; featured: boolean; createdAt: string;
 }
 export interface Service {
-  _id: string; name: string; slug: 'graphic' | 'web' | '3d';
+  _id: string; name: string; slug: string;
   description: string; features: string[]; startingPrice: string; ctaLabel: string;
 }
 export interface TeamMember {
@@ -57,7 +57,7 @@ async function apiFetch<T>(path: string, revalidate: number): Promise<T> {
   return json.data as T;
 }
 
-export async function getProjects(category?: 'graphic' | 'web' | '3d'): Promise<Project[]> {
+export async function getProjects(category?: string): Promise<Project[]> {
   const p = new URLSearchParams({ status: 'published' });
   if (category) p.set('category', category);
   return apiFetch<Project[]>(`/api/projects?${p}`, 60);
@@ -72,7 +72,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
   return apiFetch<Project[]>(`/api/projects?status=published&featured=true`, 60);
 }
 export async function getServices(): Promise<Service[]> {
-  return apiFetch<Service[]>(`/api/services`, 3600);
+  return apiFetch<Service[]>(`/api/services`, 60);
 }
 export async function getTeam(): Promise<TeamMember[]> {
   return apiFetch<TeamMember[]>(`/api/team`, 3600);
@@ -91,4 +91,39 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 export async function getSettings(): Promise<Settings> {
   return apiFetch<Settings>(`/api/settings`, 3600);
+}
+
+export interface Category {
+  _id: string;
+  slug: string;
+  label: string;
+  order: number;
+}
+
+export async function getCategories(): Promise<Category[]> {
+  return apiFetch<Category[]>(`/api/categories`, 60);
+}
+
+export interface PortfolioLink {
+  _id: string;
+  title: string;
+  slug: string;
+  projects: Project[];
+  isActive: boolean;
+  viewCount: number;
+  lastViewedAt?: string;
+  createdAt: string;
+}
+
+export async function getPortfolioLink(slug: string): Promise<PortfolioLink | { isActive: false } | null> {
+  try {
+    const res = await fetch(`${BASE}/api/portfolio-links/${slug}`, { cache: 'no-store' });
+    if (res.status === 404) return null;
+    if (res.status === 410) return { isActive: false };
+    if (!res.ok) throw new Error('Failed to fetch');
+    const data = await res.json();
+    return data.data as PortfolioLink;
+  } catch {
+    return null;
+  }
 }
