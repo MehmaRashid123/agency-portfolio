@@ -1,17 +1,5 @@
 "use client";
 
-/**
- * SectionReveal — Wraps any section with production-grade scroll-triggered
- * reveal animations using GSAP ScrollTrigger.
- *
- * Variants:
- *  - "fade-up"    : opacity + translateY (default)
- *  - "fade-left"  : opacity + translateX from left
- *  - "fade-right" : opacity + translateX from right
- *  - "scale"      : opacity + scale from 0.92
- *  - "clip"       : clip-path reveal from bottom
- */
-
 import { useEffect, useRef, ReactNode, CSSProperties } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -32,7 +20,6 @@ interface Props {
   stagger?: boolean;
   staggerSelector?: string;
   staggerAmount?: number;
-  as?: keyof JSX.IntrinsicElements;
 }
 
 export default function SectionReveal({
@@ -47,9 +34,8 @@ export default function SectionReveal({
   stagger = false,
   staggerSelector = "> *",
   staggerAmount = 0.1,
-  as: Tag = "div",
 }: Props) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -83,19 +69,12 @@ export default function SectionReveal({
       if (stagger) {
         const targets = el.querySelectorAll(staggerSelector);
         gsap.fromTo(targets, getFrom(), {
-          ...getTo(),
-          duration,
-          delay,
-          ease,
-          stagger: staggerAmount,
+          ...getTo(), duration, delay, ease, stagger: staggerAmount,
           scrollTrigger: { trigger: el, start, once },
         });
       } else {
         gsap.fromTo(el, getFrom(), {
-          ...getTo(),
-          duration,
-          delay,
-          ease,
+          ...getTo(), duration, delay, ease,
           scrollTrigger: { trigger: el, start, once },
         });
       }
@@ -104,7 +83,6 @@ export default function SectionReveal({
     return () => ctx.revert();
   }, [variant, delay, duration, start, once, stagger, staggerSelector, staggerAmount]);
 
-  // Set initial hidden state to avoid flash
   const initialStyle: CSSProperties = {
     ...style,
     ...(variant === "clip"
@@ -113,9 +91,8 @@ export default function SectionReveal({
   };
 
   return (
-    // @ts-expect-error dynamic tag
-    <Tag ref={ref} className={className} style={initialStyle}>
+    <div ref={ref} className={className} style={initialStyle}>
       {children}
-    </Tag>
+    </div>
   );
 }

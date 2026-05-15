@@ -17,7 +17,6 @@ const scrollState = { y: 0, velocity: 0, prev: 0 };
 
 function useScrollSync() {
   useEffect(() => {
-    let raf: number;
     const onScroll = () => {
       const raw = window.scrollY / (document.body.scrollHeight - window.innerHeight);
       scrollState.velocity = raw - scrollState.prev;
@@ -27,7 +26,6 @@ function useScrollSync() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(raf);
     };
   }, []);
 }
