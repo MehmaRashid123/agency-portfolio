@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import type { Settings } from "@/lib/api";
+import AnimatedLogo from "./AnimatedLogo";
 
 const DEFAULT_NAV_LINKS = [
   { href: "/work", label: "Work" },
@@ -45,16 +46,10 @@ export default function Footer({ settings }: { settings?: Settings }) {
 
           {/* Col 1 — Brand */}
           <div className="col-span-2 md:col-span-1 flex flex-col gap-5">
-            <Link
-              href="/"
-              className="text-2xl font-semibold tracking-tight w-fit hover:opacity-70 transition-opacity duration-300"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              {logoText}<span style={{ color: dotColor }}>.</span>
-            </Link>
+            <AnimatedLogo size={40} showText={true} href="/" />
             <p
               className="text-sm leading-relaxed max-w-[220px]"
-              style={{ color: "rgba(255,255,255,0.45)" }}
+              style={{ color: "rgba(232,244,255,0.45)" }}
             >
               {tagline}
             </p>

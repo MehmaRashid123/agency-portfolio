@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Settings } from "@/lib/api";
+import AnimatedLogo from "./AnimatedLogo";
 
 const DEFAULT_LINKS = [
   { href: "/work", label: "Work" },
@@ -41,12 +42,10 @@ export default function Navbar({ settings }: { settings?: Settings }) {
   return (
     <>
       <nav ref={navRef}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-[var(--border)]" : "bg-transparent"}`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-[#0d1b2a]/95 backdrop-blur-sm border-b border-[var(--border)]" : "bg-transparent"}`}
         style={{ height: "var(--nav-h)" }} aria-label="Main navigation">
         <div className="container h-full flex items-center justify-between">
-          <Link href="/" className="font-heading text-xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
-            {logoText}<span style={{ color: dotColor }}>.</span>
-          </Link>
+          <AnimatedLogo size={38} showText={true} href="/" />
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}
@@ -70,8 +69,43 @@ export default function Navbar({ settings }: { settings?: Settings }) {
           <div className="flex flex-col gap-6">
             {navLinks.map((link, i) => (
               <Link key={link.href} href={link.href}
-                className="heading-lg transition-colors duration-300 hover:text-[var(--accent)]"
-                style={{ transitionDelay: menuOpen ? `${i * 60}ms` : "0ms", transform: menuOpen ? "translateY(0)" : "translateY(20px)", opacity: menuOpen ? 1 : 0, transition: `transform 0.5s var(--ease-out-expo) ${i * 60}ms, opacity 0.5s ease ${i * 60}ms, color 0.3s ease` }}>
+                className="heading-lg transition-colors duration-300"
+                style={{
+                  transitionDelay: menuOpen ? `${i * 60}ms` : "0ms",
+                  transform: menuOpen ? "translateY(0)" : "translateY(20px)",
+                  opacity: menuOpen ? 1 : 0,
+                  transition: `transform 0.5s var(--ease-out-expo) ${i * 60}ms, opacity 0.5s ease ${i * 60}ms, color 0.3s ease`,
+                  background: "linear-gradient(135deg, #00d4ff, #7b2fff)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
+                {link.label}
+              </Link>
+            ))}
+            <Link href={ctaLink} className="btn btn-primary self-start mt-4"
+              style={{ transitionDelay: menuOpen ? `${navLinks.length * 60}ms` : "0ms", transform: menuOpen ? "translateY(0)" : "translateY(20px)", opacity: menuOpen ? 1 : 0, transition: `transform 0.5s var(--ease-out-expo) ${navLinks.length * 60}ms, opacity 0.5s ease ${navLinks.length * 60}ms` }}>
+              {ctaLabel}
+            </Link>
+          </div>
+        </div>
+      </div>
+      <div className={`fixed inset-0 z-40 bg-[var(--bg)] flex flex-col justify-center transition-all duration-500 ${menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} aria-hidden={!menuOpen}>
+        <div className="container">
+          <div className="flex flex-col gap-6">
+            {navLinks.map((link, i) => (
+              <Link key={link.href} href={link.href}
+                className="heading-lg transition-colors duration-300"
+                style={{
+                  transitionDelay: menuOpen ? `${i * 60}ms` : "0ms",
+                  transform: menuOpen ? "translateY(0)" : "translateY(20px)",
+                  opacity: menuOpen ? 1 : 0,
+                  transition: `transform 0.5s var(--ease-out-expo) ${i * 60}ms, opacity 0.5s ease ${i * 60}ms, color 0.3s ease`,
+                  background: "linear-gradient(135deg, #00d4ff, #7b2fff)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
                 {link.label}
               </Link>
             ))}

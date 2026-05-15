@@ -1,64 +1,139 @@
 ﻿"use client";
 
+/**
+ * CTABanner — Full-width closing section.
+ * Massive heading with word-by-word reveal.
+ * Single strong CTA. No 3D — let the typography breathe.
+ * Subtle ambient glow in background.
+ */
+
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Canvas, useFrame } from "@react-three/fiber";
-import * as THREE from "three";
 import type { Settings } from "@/lib/api";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function CTAParticles() {
-  const mesh = useRef<THREE.Points>(null);
-  const count = 120;
-  const positions = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 20;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
-  }
-  useFrame((s) => { if (mesh.current) mesh.current.rotation.y = s.clock.elapsedTime * 0.03; });
-  return (
-    <points ref={mesh}>
-      <bufferGeometry><bufferAttribute attach="attributes-position" args={[positions, 3]} /></bufferGeometry>
-      <pointsMaterial color="#FF4D00" size={0.05} sizeAttenuation transparent opacity={0.4} depthWrite={false} />
-    </points>
-  );
-}
-
 export default function CTABanner({ settings }: { settings?: Settings }) {
   const sectionRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const subRef     = useRef<HTMLParagraphElement>(null);
+  const ctaRef     = useRef<HTMLDivElement>(null);
 
-  const heading = settings?.ctaBanner?.heading || "Ready to build something great?";
+  const heading    = settings?.ctaBanner?.heading    || "Ready to build something great?";
   const subheading = settings?.ctaBanner?.subheading || "Tell us about your project. We'll get back to you within 24 hours.";
-  const btnLabel = settings?.ctaBanner?.buttonLabel || "Start a Project";
-  const btnLink = settings?.ctaBanner?.buttonLink || "/contact";
+  const btnLabel   = settings?.ctaBanner?.buttonLabel || "Start a Project";
+  const btnLink    = settings?.ctaBanner?.buttonLink  || "/contact";
 
   useEffect(() => {
+    const h = headingRef.current;
+    if (!h) return;
+
+    // Split heading into words
+    const words = h.innerText.split(" ");
+    h.innerHTML = words
+      .map(
+        (w) =>
+          `<span class="cta-word-wrap" style="display:inline-block;overflow:hidden;vertical-align:bottom;margin-right:0.25em"><span class="cta-word" style="display:inline-block">${w}</span></span>`
+      )
+      .join("");
+
     const ctx = gsap.context(() => {
-      gsap.fromTo(textRef.current, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: textRef.current, start: "top 80%" } });
+      const wordEls = h.querySelectorAll<HTMLElement>(".cta-word");
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%", once: true },
+      });
+
+      tl.fromTo(wordEls,
+        { y: "110%", rotateX: -15 },
+        {
+          y: "0%", rotateX: 0,
+          duration: 1, stagger: 0.06, ease: "power4.out",
+          transformPerspective: 600,
+        }
+      )
+      .fromTo(subRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.5"
+      )
+      .fromTo(ctaRef.current,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.5"
+      );
     }, sectionRef);
+
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="border-t border-[var(--border)] py-24 md:py-36 relative overflow-hidden" aria-label="Call to action">
-      <div className="absolute inset-0 z-0 opacity-60">
-        <Canvas camera={{ position: [0, 0, 6], fov: 60 }} style={{ position: "absolute", inset: 0 }} gl={{ alpha: true }} aria-hidden="true">
-          <CTAParticles />
-        </Canvas>
-      </div>
-      <div className="absolute inset-0 z-[1] opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: "256px" }} aria-hidden="true" />
+    <section
+      ref={sectionRef}
+      className="border-t border-[var(--border)] relative overflow-hidden"
+      style={{ padding: "clamp(6rem, 14vw, 14rem) 0" }}
+      aria-label="Call to action"
+    >
+      {/* Ambient glow — very subtle */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 100%, rgba(0,212,255,0.05) 0%, rgba(123,47,255,0.03) 40%, transparent 70%)",
+        }}
+      />
+
       <div className="container relative z-10">
-        <div ref={textRef} className="flex flex-col items-center text-center gap-10" style={{ opacity: 0 }}>
-          <h2 className="heading-xl max-w-3xl">{heading}</h2>
-          <p className="opacity-50 text-lg max-w-md">{subheading}</p>
-          <Link href={btnLink} className="btn btn-primary text-base px-10 py-5">{btnLabel}</Link>
+        <div className="max-w-5xl mx-auto text-center flex flex-col items-center gap-10">
+
+          {/* Heading */}
+          <h2
+            ref={headingRef}
+            className="heading-xl"
+            style={{ perspective: "600px" }}
+          >
+            {heading}
+          </h2>
+
+          {/* Sub */}
+          <p
+            ref={subRef}
+            className="text-base md:text-lg max-w-md leading-relaxed"
+            style={{ color: "rgba(232,244,255,0.45)", opacity: 0 }}
+          >
+            {subheading}
+          </p>
+
+          {/* CTA */}
+          <div ref={ctaRef} style={{ opacity: 0 }}>
+            <Link
+              href={btnLink}
+              className="btn btn-primary text-sm px-10 py-5 relative overflow-hidden group"
+            >
+              <span className="relative z-10">{btnLabel}</span>
+              {/* Shimmer sweep on hover */}
+              <span
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background:
+                    "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)",
+                  backgroundSize: "200% 100%",
+                  animation: "shimmerSweep 0.6s ease forwards",
+                }}
+              />
+            </Link>
+          </div>
+
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes shimmerSweep {
+          from { background-position: 200% 0; }
+          to   { background-position: -200% 0; }
+        }
+      `}</style>
     </section>
   );
 }
