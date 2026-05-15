@@ -17,11 +17,9 @@ export default function HeroSection({ settings }: { settings?: Settings }) {
   const metaRef    = useRef<HTMLDivElement>(null);
 
   const headline    = settings?.hero?.headline    || "We Build Things\nThat Move";
-  const subheadline = settings?.hero?.subheadline || "Graphic design, web development, and 3D art — for brands that refuse to be ordinary.";
+  const subheadline = settings?.hero?.subheadline || "A creative studio specializing in design, development, and digital experiences.";
   const cta1Label   = settings?.hero?.cta1Label   || "View Our Work";
   const cta1Link    = settings?.hero?.cta1Link    || "/work";
-  const cta2Label   = settings?.hero?.cta2Label   || "Get a Quote";
-  const cta2Link    = settings?.hero?.cta2Link    || "/contact";
   const siteName    = settings?.siteName          || "ZENDXB TechHub";
   const foundedYear = settings?.about?.foundedYear || "2021";
 
@@ -190,16 +188,6 @@ export default function HeroSection({ settings }: { settings?: Settings }) {
                   <Link href={cta1Link} className="btn btn-primary">
                     {cta1Label}
                   </Link>
-                  <Link
-                    href={cta2Link}
-                    className="inline-flex items-center gap-2 text-sm font-medium tracking-widest uppercase transition-all duration-300 hover:gap-4"
-                    style={{ color: "rgba(232,244,255,0.55)" }}
-                  >
-                    {cta2Label}
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </Link>
                 </div>
               </div>
 
@@ -214,22 +202,6 @@ export default function HeroSection({ settings }: { settings?: Settings }) {
           style={{ opacity: 0 }}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              {["Design", "Development", "3D Art"].map((s, i) => (
-                <span
-                  key={s}
-                  className="label hidden sm:block"
-                  style={{ color: "rgba(232,244,255,0.25)" }}
-                >
-                  {s}
-                  {i < 2 && (
-                    <span className="ml-6" style={{ color: "rgba(232,244,255,0.1)" }}>
-                      /
-                    </span>
-                  )}
-                </span>
-              ))}
-            </div>
             <span className="label" style={{ color: "rgba(232,244,255,0.2)" }}>
               Est. {foundedYear}
             </span>

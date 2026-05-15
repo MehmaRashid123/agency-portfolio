@@ -224,9 +224,6 @@ export default function PortfolioPageClient({ portfolio, settings }: Props) {
             </div>
 
             <div ref={btnsRef} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', opacity: 0 }}>
-              <Link href="/contact" className="btn btn-primary" style={{ fontSize: '0.82rem' }}>
-                Start a Project
-              </Link>
               <Link href="/work" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                 fontSize: '0.82rem', fontWeight: 500, letterSpacing: '0.08em',
@@ -366,7 +363,7 @@ export default function PortfolioPageClient({ portfolio, settings }: Props) {
         <div className="container" style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--accent)', marginBottom: '1.25rem' }}>
-            Let's Work Together
+            Let's Connect
           </p>
           <h2 style={{ fontFamily: 'var(--font-heading)',
             fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
@@ -378,9 +375,9 @@ export default function PortfolioPageClient({ portfolio, settings }: Props) {
             Let's build something together.
           </p>
 
-          <Link href="/contact" className="btn btn-primary"
+          <Link href="/work" className="btn btn-outline"
             style={{ fontSize: '0.85rem', display: 'inline-flex', marginBottom: '2rem' }}>
-            Start a Project
+            View All Work
           </Link>
 
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>

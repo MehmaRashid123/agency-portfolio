@@ -76,30 +76,25 @@ export default function Footer({ settings }: { settings?: Settings }) {
             </nav>
           </div>
 
-          {/* Col 3 — Services */}
-          <div className="flex flex-col gap-4">
-            <span
-              className="text-[10px] font-medium uppercase tracking-[0.16em]"
-              style={{ color: "rgba(255,255,255,0.3)" }}
-            >
-              Services
-            </span>
-            <div className="flex flex-col gap-3">
-              {[
-                { label: "Graphic Design", href: "/services#graphic" },
-                { label: "Web Development", href: "/services#web" },
-                { label: "3D Art & Animation", href: "/services#3d" },
-              ].map((s) => (
-                <Link
-                  key={s.href}
-                  href={s.href}
-                  className="footer-link text-sm w-fit"
-                >
-                  {s.label}
-                </Link>
-              ))}
+          {/* Col 3 — Services (dynamic from settings) */}
+          {settings?.services?.length ? (
+            <div className="flex flex-col gap-4">
+              <span className="text-[10px] font-medium uppercase tracking-[0.16em]"
+                style={{ color: "rgba(255,255,255,0.3)" }}>
+                Services
+              </span>
+              <div className="flex flex-col gap-3">
+                {settings.services.slice(0, 5).map((s) => (
+                  <Link key={s.title} href="/services"
+                    className="footer-link text-sm w-fit">
+                    {s.title}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div /> /* empty col placeholder */
+          )}
 
           {/* Col 4 — Socials */}
           <div className="flex flex-col gap-4">
@@ -131,17 +126,9 @@ export default function Footer({ settings }: { settings?: Settings }) {
           <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
             {copyright}
           </span>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/contact"
-              className="footer-social text-xs"
-            >
-              Get a Quote →
-            </Link>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-              Built with Next.js
-            </span>
-          </div>
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+            Built with Next.js
+          </span>
         </div>
 
       </div>

@@ -6,7 +6,7 @@ import StatsSection from "@/components/StatsSection";
 import AboutTeaser from "@/components/AboutTeaser";
 import Testimonials from "@/components/Testimonials";
 import CTABanner from "@/components/CTABanner";
-import { getFeaturedProjects, getSettings, getTestimonials, type Project, type Settings, type Testimonial } from "@/lib/api";
+import { getFeaturedProjects, getServices, getSettings, getTestimonials, type Project, type Service, type Settings, type Testimonial } from "@/lib/api";
 
 export async function generateMetadata() {
   try {
@@ -23,11 +23,13 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
   let projects: Project[] = [];
+  let services: Service[] = [];
   let settings: Settings | undefined = undefined;
   let testimonials: Testimonial[] = [];
   try {
-    [projects, settings, testimonials] = await Promise.all([
+    [projects, services, settings, testimonials] = await Promise.all([
       getFeaturedProjects().catch(() => []),
+      getServices().catch(() => []),
       getSettings().catch(() => undefined),
       getTestimonials().catch(() => []),
     ]);
@@ -38,7 +40,7 @@ export default async function HomePage() {
       <HeroSection settings={settings} />
       <Marquee settings={settings} />
       <FeaturedWork projects={projects} settings={settings} />
-      <ServicesSection settings={settings} />
+      <ServicesSection services={services} settings={settings} />
       <StatsSection settings={settings} />
       <AboutTeaser settings={settings} />
       <Testimonials testimonials={testimonials} settings={settings} />
